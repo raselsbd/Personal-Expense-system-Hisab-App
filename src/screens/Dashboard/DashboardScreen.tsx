@@ -133,7 +133,7 @@ export default function DashboardScreen({ navigation }: Props) {
         </Text>
       </View>
 
-      <Pressable style={styles.balanceCardWrap} onPress={() => navigation.navigate('TransactionsList')}>
+      <Pressable style={styles.balanceCardWrap} onPress={() => navigation.navigate('Accounts')}>
         <LinearGradient
           colors={theme.dark ? [palette.indigo400, palette.indigo700] : [palette.indigo600, palette.indigo700]}
           start={{ x: 0, y: 0 }}

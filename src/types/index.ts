@@ -1,5 +1,13 @@
 export type TransactionType = 'income' | 'expense';
-export type TransactionSource = 'manual' | 'project_settlement' | 'recurring' | 'loan';
+export type TransactionSource = 'manual' | 'project_settlement' | 'recurring' | 'loan' | 'transfer';
+
+// Sources that only move money between the balance and someone/somewhere else —
+// they change the balance but are never counted as income or cost.
+export const NON_INCOME_SOURCES: TransactionSource[] = ['loan', 'transfer'];
+
+export type AccountType = 'cash' | 'bkash' | 'bank';
+
+export const ACCOUNT_TYPES: AccountType[] = ['cash', 'bkash', 'bank'];
 
 export interface PersonalTransaction {
   id: string;
@@ -11,6 +19,8 @@ export interface PersonalTransaction {
   source: TransactionSource;
   projectId: string | null;
   loanId: string | null;
+  transferId: string | null;
+  account: AccountType;
   photoUri: string | null;
   createdAt: string;
 }
@@ -99,6 +109,7 @@ export interface PersonalLoan {
   reminderNotificationId: string | null;
   settled: boolean;
   settledAt: string | null;
+  account: AccountType;
   createdAt: string;
 }
 

@@ -7,7 +7,7 @@ import {
   getTransactionsByLoanId,
   updatePersonalTransaction,
 } from './personalRepo';
-import type { LoanDirection, PersonalLoan } from '../types';
+import type { AccountType, LoanDirection, PersonalLoan } from '../types';
 
 interface Row {
   id: string;
@@ -20,6 +20,7 @@ interface Row {
   reminder_notification_id: string | null;
   settled: number;
   settled_at: string | null;
+  account: string | null;
   created_at: string;
 }
 
@@ -35,6 +36,7 @@ function mapRow(r: Row): PersonalLoan {
     reminderNotificationId: r.reminder_notification_id,
     settled: r.settled === 1,
     settledAt: r.settled_at,
+    account: (r.account ?? 'cash') as AccountType,
     createdAt: r.created_at,
   };
 }
@@ -46,13 +48,15 @@ export async function addLoan(input: {
   note?: string;
   date: string;
   dueDate?: string | null;
+  account?: AccountType;
 }): Promise<PersonalLoan> {
   const db = await getDb();
   const id = generateId();
   const createdAt = new Date().toISOString();
+  const account = input.account ?? 'cash';
   await db.runAsync(
-    `INSERT INTO personal_loans (id, direction, person_name, amount, note, date, due_date, reminder_notification_id, settled, settled_at, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 0, NULL, ?)`,
+    `INSERT INTO personal_loans (id, direction, person_name, amount, note, date, due_date, reminder_notification_id, settled, settled_at, account, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, NULL, 0, NULL, ?, ?)`,
     id,
     input.direction,
     input.personName,
@@ -60,9 +64,11 @@ export async function addLoan(input: {
     input.note ?? '',
     input.date,
     input.dueDate ?? null,
+    account,
     createdAt
   );
 
+  // Lending takes money out of the balance (but is not a cost); borrowing is display-only.
   if (input.direction === 'lent') {
     await addPersonalTransaction({
       type: 'expense',
@@ -72,6 +78,7 @@ export async function addLoan(input: {
       date: input.date,
       source: 'loan',
       loanId: id,
+      account,
     });
   }
 
@@ -86,6 +93,7 @@ export async function addLoan(input: {
     reminderNotificationId: null,
     settled: false,
     settledAt: null,
+    account,
     createdAt,
   };
 }
@@ -111,31 +119,41 @@ export async function listLoans(direction?: LoanDirection): Promise<PersonalLoan
 
 export async function updateLoan(
   id: string,
-  input: { personName: string; amount: number; note: string; date: string; dueDate?: string | null }
+  input: {
+    personName: string;
+    amount: number;
+    note: string;
+    date: string;
+    dueDate?: string | null;
+    account?: AccountType;
+  }
 ): Promise<void> {
   const db = await getDb();
   const existing = await getLoanById(id);
+  const account = input.account ?? existing?.account ?? 'cash';
   await db.runAsync(
-    `UPDATE personal_loans SET person_name = ?, amount = ?, note = ?, date = ?, due_date = ? WHERE id = ?`,
+    `UPDATE personal_loans SET person_name = ?, amount = ?, note = ?, date = ?, due_date = ?, account = ? WHERE id = ?`,
     input.personName,
     input.amount,
     input.note,
     input.date,
     input.dueDate ?? null,
+    account,
     id
   );
 
   if (existing?.direction === 'lent') {
     const linked = await getTransactionsByLoanId(id);
-    const given = linked.find((tx) => tx.category === 'Loan Given');
-    if (given) {
-      await updatePersonalTransaction(given.id, {
-        type: 'expense',
+    for (const tx of linked) {
+      const isGiven = tx.category === 'Loan Given';
+      await updatePersonalTransaction(tx.id, {
+        type: tx.type,
         amount: input.amount,
-        category: 'Loan Given',
-        note: `Loan to ${input.personName}`,
-        date: input.date,
-        photoUri: given.photoUri,
+        category: tx.category,
+        note: isGiven ? `Loan to ${input.personName}` : `Loan repaid by ${input.personName}`,
+        date: isGiven ? input.date : tx.date,
+        account,
+        photoUri: tx.photoUri,
       });
     }
   }
@@ -167,6 +185,7 @@ export async function setLoanSettled(id: string, settled: boolean): Promise<void
         date: new Date().toISOString().slice(0, 10),
         source: 'loan',
         loanId: id,
+        account: loan.account,
       });
     } else {
       const linked = await getTransactionsByLoanId(id);

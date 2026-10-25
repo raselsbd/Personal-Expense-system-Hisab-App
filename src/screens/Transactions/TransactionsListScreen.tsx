@@ -9,7 +9,7 @@ import { TransactionRow } from '../../components/TransactionRow';
 import { EmptyState } from '../../components/EmptyState';
 import { DateField } from '../../components/DateField';
 import { useSettings } from '../../context/SettingsContext';
-import { useTranslation } from '../../i18n/useTranslation';
+import { useTranslation, translateAccount } from '../../i18n/useTranslation';
 import { semantic } from '../../theme/colors';
 import { formatCurrency } from '../../utils/currency';
 import {
@@ -33,6 +33,7 @@ export default function TransactionsListScreen({ route }: Props) {
   const { t, lang } = useTranslation();
   const colors = theme.dark ? semantic.dark : semantic.light;
 
+  const account = route.params?.account;
   const [typeFilter, setTypeFilter] = useState<TypeFilter>(route.params?.type ?? 'all');
   const [rangeMode, setRangeMode] = useState<RangeMode>(route.params?.rangeMode ?? 'all');
   const [customStart, setCustomStart] = useState(new Date());
@@ -56,11 +57,12 @@ export default function TransactionsListScreen({ route }: Props) {
   const load = useCallback(async () => {
     const data = await getFilteredTransactions({
       type: typeFilter === 'all' ? undefined : typeFilter,
+      account,
       startDate: range.start,
       endDate: range.end,
     });
     setTransactions(data);
-  }, [typeFilter, range.start, range.end]);
+  }, [typeFilter, account, range.start, range.end]);
 
   useFocusEffect(
     useCallback(() => {
@@ -101,7 +103,7 @@ export default function TransactionsListScreen({ route }: Props) {
       <ScreenContainer>
         <View style={styles.headerRow}>
           <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-            {t('allTransactions')}
+            {account ? translateAccount(account, lang) : t('allTransactions')}
           </Text>
           {selectionMode ? (
             <Text variant="labelMedium" style={{ color: theme.colors.primary }} onPress={exitSelectionMode}>

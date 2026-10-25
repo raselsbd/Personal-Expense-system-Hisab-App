@@ -7,6 +7,8 @@ import AddTransactionScreen from '../screens/Dashboard/AddTransactionScreen';
 import TransactionsListScreen from '../screens/Transactions/TransactionsListScreen';
 import LoansListScreen from '../screens/Dashboard/LoansListScreen';
 import AddLoanScreen from '../screens/Dashboard/AddLoanScreen';
+import AccountsScreen from '../screens/Dashboard/AccountsScreen';
+import AddTransferScreen from '../screens/Dashboard/AddTransferScreen';
 import type { HomeStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -30,6 +32,8 @@ export function HomeStack() {
       <Stack.Screen name="TransactionsList" component={TransactionsListScreen} options={{ headerShown: false }} />
       <Stack.Screen name="LoansList" component={LoansListScreen} options={{ headerShown: false }} />
       <Stack.Screen name="AddLoan" component={AddLoanScreen} options={{ title: '', presentation: 'modal' }} />
+      <Stack.Screen name="Accounts" component={AccountsScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="AddTransfer" component={AddTransferScreen} options={{ title: '', presentation: 'modal' }} />
     </Stack.Navigator>
   );
 }

@@ -85,6 +85,33 @@ export const translations = {
   catProjectSettlement: { en: 'Project Settlement', bn: 'প্রজেক্ট নিষ্পত্তি' },
   catLoanGiven: { en: 'Loan Given', bn: 'ধার দেওয়া' },
   catLoanReturned: { en: 'Loan Returned', bn: 'ধার ফেরত' },
+  catTransfer: { en: 'Transfer', bn: 'ট্রান্সফার' },
+
+  // Accounts (cash / bKash / bank)
+  accountsTitle: { en: 'Balance by Account', bn: 'অ্যাকাউন্ট অনুযায়ী ব্যালেন্স' },
+  accountLabel: { en: 'Account', bn: 'অ্যাকাউন্ট' },
+  accountCash: { en: 'Cash', bn: 'ক্যাশ' },
+  accountBkash: { en: 'bKash', bn: 'বিকাশ' },
+  accountBank: { en: 'Bank', bn: 'ব্যাংক' },
+  tapAccountForLog: { en: 'Tap an account to see its history', bn: 'হিসাব দেখতে অ্যাকাউন্টে ট্যাপ করুন' },
+  transferMoney: { en: 'Transfer Money', bn: 'টাকা ট্রান্সফার' },
+  transferDesc: {
+    en: 'Move money between your accounts. This does not count as income or cost.',
+    bn: 'এক অ্যাকাউন্ট থেকে অন্য অ্যাকাউন্টে টাকা নিন। এটি আয় বা খরচ হিসেবে গণ্য হবে না।',
+  },
+  fromAccount: { en: 'From', bn: 'যেখান থেকে' },
+  toAccount: { en: 'To', bn: 'যেখানে' },
+  sameAccountError: { en: 'Choose two different accounts', bn: 'দুটি আলাদা অ্যাকাউন্ট বেছে নিন' },
+  saveTransferBtn: { en: 'Save Transfer', bn: 'ট্রান্সফার সেভ করুন' },
+  loanAccountLabel: { en: 'Given from', bn: 'কোথা থেকে দিয়েছি' },
+  borrowedNoBalanceNote: {
+    en: 'Borrowed money is only tracked here — it is not added to or deducted from your balance.',
+    bn: 'ধার নেওয়া টাকা শুধু এখানে দেখাবে — ব্যালেন্সে যোগ বা বিয়োগ হবে না।',
+  },
+  lentBalanceNote: {
+    en: 'Deducted from your balance, but not counted as a cost. Repayment is added back, not counted as income.',
+    bn: 'ব্যালেন্স থেকে কাটবে, কিন্তু খরচ হিসেবে ধরা হবে না। ফেরত পেলে ব্যালেন্সে যোগ হবে, আয় হিসেবে নয়।',
+  },
 
   // Projects
   projects: { en: 'Projects', bn: 'প্রজেক্ট' },
@@ -150,8 +177,8 @@ export const translations = {
   },
   settleLossMsgPrefix: { en: 'This project went', bn: 'এই প্রজেক্টে' },
   settleLossMsgSuffix: {
-    en: 'over budget. That amount will be deducted from your personal balance.',
-    bn: 'বাজেটের চেয়ে বেশি খরচ হয়েছে। এই পরিমাণ আপনার ব্যক্তিগত ব্যালেন্স থেকে বিয়োগ হবে।',
+    en: 'over budget. That amount will be deducted from your personal balance, but not counted as a monthly cost.',
+    bn: 'বাজেটের চেয়ে বেশি খরচ হয়েছে। এই পরিমাণ আপনার ব্যক্তিগত ব্যালেন্স থেকে বিয়োগ হবে, তবে মাসিক খরচ হিসেবে ধরা হবে না।',
   },
   discountOptional: { en: 'Discount (optional)', bn: 'ডিসকাউন্ট (ঐচ্ছিক)' },
   netBenefit: { en: 'Net Benefit', bn: 'নিট লাভ' },
@@ -320,6 +347,8 @@ export const translations = {
     en: 'This will replace all current data with the contents of the backup file. This cannot be undone. Continue?',
     bn: 'এটি বর্তমান সব ডেটা মুছে ব্যাকআপ ফাইলের ডেটা দিয়ে প্রতিস্থাপন করবে। এটি ফিরিয়ে আনা যাবে না। এগোবেন?',
   },
+  saveToDevice: { en: 'Save to Phone', bn: 'ফোনে সেভ করুন' },
+  saveToDeviceSuccess: { en: 'Backup saved:', bn: 'ব্যাকআপ সেভ হয়েছে:' },
   exportSuccess: { en: 'Backup exported successfully', bn: 'ব্যাকআপ সফলভাবে এক্সপোর্ট হয়েছে' },
   exportFailed: { en: 'Could not export backup', bn: 'ব্যাকআপ এক্সপোর্ট করা যায়নি' },
   importSuccess: { en: 'Backup restored successfully', bn: 'ব্যাকআপ সফলভাবে রিস্টোর হয়েছে' },

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { translations, TranslationKey } from './translations';
+import type { AccountType } from '../types';
 
 export function useTranslation() {
   const { settings } = useSettings();
@@ -29,7 +30,19 @@ const CATEGORY_KEY_MAP: Record<string, TranslationKey> = {
   'Project Settlement': 'catProjectSettlement',
   'Loan Given': 'catLoanGiven',
   'Loan Returned': 'catLoanReturned',
+  Transfer: 'catTransfer',
 };
+
+const ACCOUNT_KEY_MAP: Record<AccountType, TranslationKey> = {
+  cash: 'accountCash',
+  bkash: 'accountBkash',
+  bank: 'accountBank',
+};
+
+export function translateAccount(account: AccountType, lang: 'en' | 'bn'): string {
+  const key = ACCOUNT_KEY_MAP[account] ?? 'accountCash';
+  return translations[key][lang] || translations[key].en;
+}
 
 export function translateCategory(category: string, lang: 'en' | 'bn'): string {
   const key = CATEGORY_KEY_MAP[category];

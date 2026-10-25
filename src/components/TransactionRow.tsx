@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { semantic } from '../theme/colors';
 import { formatCurrency } from '../utils/currency';
 import { formatDisplayDate } from '../utils/dateUtils';
-import { translateCategory } from '../i18n/useTranslation';
+import { translateAccount, translateCategory } from '../i18n/useTranslation';
 import type { Language, PersonalTransaction } from '../types';
 
 interface Props {
@@ -22,12 +22,19 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Project Settlement': 'briefcase-check',
   'Loan Given': 'hand-coin-outline',
   'Loan Returned': 'cash-refund',
+  Transfer: 'swap-horizontal',
   Food: 'food',
   Transport: 'bus',
   Bills: 'file-document',
   Shopping: 'cart',
   Health: 'heart-pulse',
   Other: 'shape',
+};
+
+const SOURCE_BADGE_ICONS: Record<string, string> = {
+  recurring: 'repeat',
+  loan: 'handshake-outline',
+  transfer: 'swap-horizontal',
 };
 
 export function TransactionRow({
@@ -52,9 +59,9 @@ export function TransactionRow({
       ) : (
         <View style={[styles.iconWrap, { backgroundColor: bg }]}>
           <MaterialCommunityIcons name={icon as any} size={18} color={color} />
-          {transaction.source === 'recurring' ? (
+          {transaction.source === 'recurring' || transaction.source === 'loan' || transaction.source === 'transfer' ? (
             <View style={[styles.badge, { backgroundColor: theme.colors.surface }]}>
-              <MaterialCommunityIcons name="repeat" size={10} color={theme.colors.onSurfaceVariant} />
+              <MaterialCommunityIcons name={SOURCE_BADGE_ICONS[transaction.source] as any} size={10} color={theme.colors.onSurfaceVariant} />
             </View>
           ) : null}
         </View>
@@ -64,7 +71,7 @@ export function TransactionRow({
           {translateCategory(transaction.category, lang)}
         </Text>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }} numberOfLines={1}>
-          {transaction.note ? transaction.note : formatDisplayDate(transaction.date)}
+          {translateAccount(transaction.account, lang)} · {transaction.note ? transaction.note : formatDisplayDate(transaction.date)}
         </Text>
       </View>
       {transaction.photoUri ? (

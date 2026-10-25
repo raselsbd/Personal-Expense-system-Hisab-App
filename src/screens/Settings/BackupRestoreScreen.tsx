@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Dialog, Portal, Text, useTheme } from 'react-native-paper';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
-import { File, Paths } from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -20,6 +20,7 @@ export default function BackupRestoreScreen() {
   const colors = theme.dark ? semantic.dark : semantic.light;
 
   const [exporting, setExporting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const [pendingImportUri, setPendingImportUri] = useState<string | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -47,10 +48,36 @@ export default function BackupRestoreScreen() {
     }
   };
 
+  // Lets the user pick a folder (e.g. Downloads) and writes the backup straight there,
+  // so it isn't lost if the share sheet is dismissed without saving.
+  const handleSaveToDevice = async () => {
+    setErrorMessage(null);
+    setResultMessage(null);
+    let directory: Directory;
+    try {
+      directory = await Directory.pickDirectoryAsync();
+    } catch {
+      return; // picker dismissed
+    }
+    setSaving(true);
+    try {
+      const payload = await exportBackup();
+      const file = directory.createFile(`hisab-backup-${backupDateStamp()}.json`, 'application/json');
+      file.write(JSON.stringify(payload));
+      setResultMessage(`${t('saveToDeviceSuccess')} ${file.name}`);
+    } catch {
+      setErrorMessage(t('exportFailed'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handlePickImportFile = async () => {
     setErrorMessage(null);
     setResultMessage(null);
-    const result = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
+    // Share targets often save the backup as .txt or a generic file, so accept any file;
+    // the contents are validated before anything is restored.
+    const result = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true });
     if (result.canceled || result.assets.length === 0) return;
     setPendingImportUri(result.assets[0].uri);
     setConfirmVisible(true);
@@ -63,7 +90,7 @@ export default function BackupRestoreScreen() {
     setErrorMessage(null);
     try {
       const content = await new File(pendingImportUri).text();
-      const parsed = JSON.parse(content);
+      const parsed = JSON.parse(content.replace(/^﻿/, '').trim());
       if (!isValidBackupPayload(parsed)) throw new Error('invalid');
       await importBackup(parsed);
       await refresh();
@@ -97,6 +124,16 @@ export default function BackupRestoreScreen() {
             style={{ borderRadius: 14, marginTop: 12, alignSelf: 'flex-start' }}
           >
             {t('exportBackup')}
+          </Button>
+          <Button
+            mode="outlined"
+            icon="folder-download-outline"
+            onPress={handleSaveToDevice}
+            loading={saving}
+            disabled={saving}
+            style={{ borderRadius: 14, marginTop: 8, alignSelf: 'flex-start' }}
+          >
+            {t('saveToDevice')}
           </Button>
         </View>
       </View>
@@ -146,6 +183,12 @@ export default function BackupRestoreScreen() {
       </Portal>
     </ScreenContainer>
   );
+}
+
+function backupDateStamp(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`;
 }
 
 const styles = StyleSheet.create({

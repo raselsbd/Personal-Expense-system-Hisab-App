@@ -7,6 +7,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { DateField } from '../../components/DateField';
 import { ReceiptPicker } from '../../components/ReceiptPicker';
+import { AccountPicker } from '../../components/AccountPicker';
 import {
   addPersonalTransaction,
   deletePersonalTransaction,
@@ -19,7 +20,7 @@ import { useSettings } from '../../context/SettingsContext';
 import { useTranslation, translateCategory } from '../../i18n/useTranslation';
 import { semantic } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/types';
-import type { CustomCategory, TransactionType } from '../../types';
+import type { AccountType, CustomCategory, TransactionType } from '../../types';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'AddTransaction'>;
 
@@ -45,6 +46,7 @@ export default function AddTransactionScreen({ navigation, route }: Props) {
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>([]);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [account, setAccount] = useState<AccountType>('cash');
 
   useEffect(() => {
     listCustomCategories().then(setCustomCategories);
@@ -69,6 +71,7 @@ export default function AddTransactionScreen({ navigation, route }: Props) {
         setNote(existing.note);
         setDate(existing.date);
         setPhotoUri(existing.photoUri);
+        setAccount(existing.account);
       }
       setLoading(false);
     })();
@@ -92,6 +95,7 @@ export default function AddTransactionScreen({ navigation, route }: Props) {
           category,
           note,
           date,
+          account,
           photoUri,
         });
       } else {
@@ -101,6 +105,7 @@ export default function AddTransactionScreen({ navigation, route }: Props) {
           category,
           note,
           date,
+          account,
           photoUri,
         });
       }
@@ -175,6 +180,8 @@ export default function AddTransactionScreen({ navigation, route }: Props) {
           ))}
         </View>
       </View>
+
+      <AccountPicker label={t('accountLabel')} value={account} onChange={setAccount} lang={lang} />
 
       <TextInput label={t('noteOptional')} value={note} onChangeText={setNote} mode="outlined" />
 

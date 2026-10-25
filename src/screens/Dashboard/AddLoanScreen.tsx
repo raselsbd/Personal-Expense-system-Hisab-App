@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { DateField } from '../../components/DateField';
+import { AccountPicker } from '../../components/AccountPicker';
 import {
   addLoan,
   deleteLoan,
@@ -19,14 +20,14 @@ import { useSettings } from '../../context/SettingsContext';
 import { useTranslation } from '../../i18n/useTranslation';
 import { semantic } from '../../theme/colors';
 import type { HomeStackParamList } from '../../navigation/types';
-import type { LoanDirection } from '../../types';
+import type { AccountType, LoanDirection } from '../../types';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'AddLoan'>;
 
 export default function AddLoanScreen({ navigation, route }: Props) {
   const theme = useTheme();
   const { settings } = useSettings();
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const colors = theme.dark ? semantic.dark : semantic.light;
 
   const loanId = route.params?.loanId;
@@ -40,6 +41,7 @@ export default function AddLoanScreen({ navigation, route }: Props) {
   const [hasDueDate, setHasDueDate] = useState(false);
   const [dueDate, setDueDate] = useState(new Date());
   const [settled, setSettled] = useState(false);
+  const [account, setAccount] = useState<AccountType>('cash');
   const [existingSettled, setExistingSettled] = useState(false);
   const [existingReminderId, setExistingReminderId] = useState<string | null>(null);
   const [existingDueDateIso, setExistingDueDateIso] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export default function AddLoanScreen({ navigation, route }: Props) {
         setHasDueDate(!!existing.dueDate);
         if (existing.dueDate) setDueDate(isoDateToDate(existing.dueDate));
         setSettled(existing.settled);
+        setAccount(existing.account);
         setExistingSettled(existing.settled);
         setExistingReminderId(existing.reminderNotificationId);
         setExistingDueDateIso(existing.dueDate);
@@ -99,6 +102,7 @@ export default function AddLoanScreen({ navigation, route }: Props) {
           note,
           date: dateToIsoDate(date),
           dueDate: dueDateIso,
+          account,
         });
         await setLoanSettled(loanId, settled);
         if (!settled) {
@@ -112,6 +116,7 @@ export default function AddLoanScreen({ navigation, route }: Props) {
           note,
           date: dateToIsoDate(date),
           dueDate: dueDateIso,
+          account,
         });
         if (dueDateIso) {
           const notificationId = await scheduleLoanDueReminder(loan.id, loan.personName, direction, dueDateIso);
@@ -169,6 +174,14 @@ export default function AddLoanScreen({ navigation, route }: Props) {
       />
       <TextInput label={t('noteOptional')} value={note} onChangeText={setNote} mode="outlined" />
       <DateField label={t('dateWord')} value={date} onChange={setDate} maximumDate={new Date()} />
+
+      {direction === 'lent' ? (
+        <AccountPicker label={t('loanAccountLabel')} value={account} onChange={setAccount} lang={lang} />
+      ) : null}
+
+      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+        {direction === 'lent' ? t('lentBalanceNote') : t('borrowedNoBalanceNote')}
+      </Text>
 
       <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
         <View style={styles.switchRow}>

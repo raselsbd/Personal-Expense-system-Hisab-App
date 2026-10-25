@@ -3,7 +3,11 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 export type HomeStackParamList = {
   Dashboard: undefined;
   AddTransaction: { type?: 'income' | 'expense'; transactionId?: string } | undefined;
-  TransactionsList: { type?: 'income' | 'expense'; rangeMode?: 'all' | 'thisMonth' } | undefined;
+  TransactionsList:
+    | { type?: 'income' | 'expense'; rangeMode?: 'all' | 'thisMonth'; account?: 'cash' | 'bkash' | 'bank' }
+    | undefined;
+  Accounts: undefined;
+  AddTransfer: undefined;
   LoansList: { direction?: 'lent' | 'borrowed' } | undefined;
   AddLoan: { direction?: 'lent' | 'borrowed'; loanId?: string } | undefined;
 };

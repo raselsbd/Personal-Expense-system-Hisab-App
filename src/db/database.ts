@@ -142,8 +142,12 @@ export async function initDatabase(): Promise<void> {
   await addColumnIfMissing(db, 'project_expenses', 'photo_uri', 'TEXT');
   await addColumnIfMissing(db, 'personal_transactions', 'photo_uri', 'TEXT');
   await addColumnIfMissing(db, 'personal_transactions', 'loan_id', 'TEXT');
+  await addColumnIfMissing(db, 'personal_transactions', 'transfer_id', 'TEXT');
+  await addColumnIfMissing(db, 'personal_transactions', 'account', "TEXT NOT NULL DEFAULT 'cash'");
+  await addColumnIfMissing(db, 'personal_loans', 'account', "TEXT NOT NULL DEFAULT 'cash'");
 
   await db.execAsync(`
     CREATE INDEX IF NOT EXISTS idx_personal_transactions_loan ON personal_transactions(loan_id);
+    CREATE INDEX IF NOT EXISTS idx_personal_transactions_account ON personal_transactions(account);
   `);
 }
